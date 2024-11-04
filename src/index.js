@@ -1,10 +1,12 @@
 import mongoose from "mongoose";
-
+import cors from "cors";
+import cookieParser from "cookie-parser";
 import { DBName } from "./constants.js";
-import express from "express";
-const app = express();
+import { app } from "./app.js";
 import connectDB from "./db/db.js";
 import dotenv from "dotenv";
+
+
 
 dotenv.config({
     path: "./env"
