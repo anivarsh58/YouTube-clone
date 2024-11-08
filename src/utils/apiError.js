@@ -7,7 +7,7 @@ class APIError extends Error {
             this.statusCode = statusCode;
             this.data = null;
             this.message = message;
-            this.success = False;
+            this.success = false;
             this.errors = error;
 
             if (stack)
@@ -18,6 +18,7 @@ class APIError extends Error {
             {
                 Error.captureStackTrace(this, this.constructor);
             }
+            
         }
     }
 
