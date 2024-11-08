@@ -41,7 +41,3 @@ connectDB()
 //         throw error
 //     }
 // })();
-
-app.listen(process.env.PORT, () => {
-    console.log(`Server has started on ${process.env.PORT}`);
-})
