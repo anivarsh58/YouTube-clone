@@ -17,4 +17,10 @@ userRouter.route("/register").post(
     registerUser)
 // userRouter.route("/login").post(login)
 
+userRouter.route("/login").post(
+    loginUser
+)
+
+userRouter.route("/logout").post(verifyJWT, logoutUser)
+
 export default userRouter
