@@ -4,6 +4,7 @@ import {User} from "../models/user.models.js"
 import { uploadOnCloudinary } from "../utils/cloudinary.js";
 import { APIResponse } from "../utils/apiResponse.js";
 import jwt from "jsonwebtoken";
+import mongoose from "mongoose";
 const registerUser = asyncHandler(async (req, res) => {
     const {fullName, email, username, password} = req.body
 
@@ -370,7 +371,73 @@ const getUserChannelProfile = asyncHandler(async (req, res) => {
 
 })
 
+const getWatchHistory = asyncHandler(async(req, res) => {
+    const user = await User.aggregate([
+        {
+            $match: {
+                _id: new mongoose.Types.ObjectId(req.user._id)
+            }
+        },
+        {
+            $lookup: {
+                from: "videos",
+                localField: "watchHistory",
+                foreignField: "_id",
+                as: "watchHistory",
+                /*
+                In Users, for every user, we now have a new field -
+                watchHistory which has documents of every ‘Video’
+                the user has seen. In those ‘Video’ documents,
+                since they were formed as a result of the lookup
+                operation, this pipeline is being applied.
+
+                What this pipeline does is that for every ‘Video’
+                in watchHistory it looks up the “_id” in users
+                that match the “owner” for a “Video”, it changes
+                the owner that previously had just the value of
+                “_id” with a Document that has the same “_id” as
+                “owner” previously did.
+                */
+
+                pipeline: [
+                    {
+                        $lookup: {
+                            from: "users",
+                            localField: "owner",
+                            foreignField: "_id",
+                            as: "owner",
+                            pipeline: [
+                                {
+                                    $project: {
+                                        fullName: 1,
+                                        username: 1,
+                                        avatar: 1
+                                    }
+                                },
+                                {
+                                    $addFields: {
+                                        owner: {
+                                            $first: "$owner"
+                                        }
+                                    }
+                                }
+                            ]
+
+                        }
+                    }
+                ]
+            }
+        }
+    ])
+
+    return res
+    .status(200)
+    .json(
+        new APIResponse(200, user[0].watchHistory, "Watch History fetched successfully.")
+    )
+})
+
 
 export {registerUser, loginUser, logoutUser, getCurrentUser, changeCurrentPassword,
-    updateUserAvatar, updateUserCoverImage
+    updateUserAvatar, updateUserCoverImage, getWatchHistory
 }
